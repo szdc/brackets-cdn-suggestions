@@ -17,5 +17,5 @@ define(function (require, exports, module) {
     }
   }
   
-  var source = downloadSource(GOOGLE_HOSTED_LIBRARIES_URL));
+  var source = downloadSource(GOOGLE_HOSTED_LIBRARIES_URL);
 });
