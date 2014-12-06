@@ -6,14 +6,16 @@ define(function (require, exports, module) {
   
   // Modules
   require('modules/DOMParser');
-  var Library = require('modules/Library');
+  
+  var CodeHintManager = brackets.getModule('editor/CodeHintManager'),
+      CDNLibrary      = require('modules/CDNLibrary');
   
   // Constants
   var GOOGLE_HOSTED_LIBRARIES_URL = 'https://developers.google.com/speed/libraries/devguide',
       SELECTOR_LIBRARIES = 'div[itemprop=articleBody] > div[id]';
   
   // Fields
-  var libraries = [];
+  var cdnLibraries = [];
   
   /**
    * Downloads and parses the Google Hosted Libraries webpage.
@@ -39,10 +41,10 @@ define(function (require, exports, module) {
   function parseLibraries(libElements) {
     for (var i = 0; i < libElements.length; i++) {
       var element = libElements[i],
-          library = Library.fromElement(element);
+          cdnLibrary = CDNLibrary.fromElement(element);
 
-      if (library !== null) {
-        libraries.push(library);
+      if (cdnLibrary !== null) {
+        cdnLibraries.push(cdnLibrary);
       }
     }
   }
