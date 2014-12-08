@@ -13,7 +13,7 @@ define(function (require, exports, module) {
    * @param {String} name
    * The name of the library, e.g. Angular JS
    *
-   * @param {String} snippet
+   * @param {String} latestSnippet
    * The latest version's HTML snippet for the library
    * e.g. <script src="..."></script>
    *
@@ -25,18 +25,17 @@ define(function (require, exports, module) {
    * An object containing public methods exposed by
    * the class.
    */
-  function Library(id, name, snippet, versions) {
+  function Library(id, name, latestSnippet, versions) {
     if (arguments.length !== 4 || versions.length < 1) {
       return null;
     }
     
-    var snippets = [];
-    versions.forEach(function (element) {
-      snippets.push(snippet.replace(new RegExp(versions[0], 'g'), element));
-    });
-    
-    function getLatestSnippet() {
-      return snippet;
+    function getSnippet(version) {
+      if (typeof version === 'undefined') {
+        return latestSnippet;
+      } else {
+        return latestSnippet.replace(new RegExp(versions[0], 'g'), version);
+      }
     }
     
     function getVersions() {
@@ -52,7 +51,7 @@ define(function (require, exports, module) {
     }
     
     return {
-      getLatestSnippet: getLatestSnippet,
+      getSnippet:       getSnippet,
       getVersions:      getVersions,
       getName:          getName,
       getId:            getId

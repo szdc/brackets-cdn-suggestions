@@ -43,7 +43,7 @@ define(function (require, exports, module) {
     } else {
       return false;
     }
-  }
+  };
   
   /**
    * Determines if library hints are available for the current
@@ -53,7 +53,7 @@ define(function (require, exports, module) {
     return tagInfo.tagName === 'script' && 
            tagInfo.position.tokenType === 'attr.name' &&
            tagInfo.attr.name.length === 0;
-  }
+  };
   
   /**
    * Determines if version hints are available for the current
@@ -61,7 +61,7 @@ define(function (require, exports, module) {
    */
   CDNHints.prototype.hasVersionHints = function (tagInfo) {
     return CDNLibrary.findById(this.libraries, tagInfo.attr.name) !== null;
-  }
+  };
   
   /**
    * Returns a list of available hints for the current editor
@@ -90,7 +90,7 @@ define(function (require, exports, module) {
     } else {
       return this.getVersionHints(library);
     }
-  }
+  };
   
   /**
    * Returns a list of library hints for the current editor 
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
       selectInitial: true,
       handleWideResults: false
     };
-  }
+  };
   
   /**
    * Returns a list of version hints for the library in the 
@@ -161,7 +161,7 @@ define(function (require, exports, module) {
       selectInitial: true,
       handleWideResults: false
     };
-  }
+  };
   
   /**
    * Inserts a hint into the current editor context.
@@ -174,23 +174,65 @@ define(function (require, exports, module) {
    * insertion with an explicit hint request.
    */
   CDNHints.prototype.insertHint = function (hint) {
+    var pos     = this.editor.getCursorPos(),
+        tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
+        library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
+
+    if (library === null) {
+      this.insertLibraryId(hint);
+      return true;
+    } else {
+      this.insertLibrarySnippet(hint);
+      return false;
+    }
+  }  
+  
+  /**
+   * Inserts the selected library ID.
+   */
+  CDNHints.prototype.insertLibraryId = function (hint) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
-        library  = CDNLibrary.findByName(this.libraries, hint);
+        library  = CDNLibrary.findByName(this.libraries, hint),
+        snippet  = library.getId();
     
-    var snippet = library.getId();
+    // Account for the user having typed part of 
+    // the library name
     startPos.ch -= tagInfo.attr.name.length;
     
+    // Add an end position to overwrite the
+    // typed characters
     var endPos = {
       line: startPos.line,
       ch: startPos.ch + snippet.length
     };
     
     document.replaceRange(snippet, startPos, endPos);
+  };
+  
+  /**
+   * Inserts the HTML snippet for the selected library and
+   * version
+   */
+  CDNHints.prototype.insertLibrarySnippet = function (hint) {
+    var document = this.editor.document,
+        startPos = this.editor.getCursorPos(),
+        tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
+        library  = CDNLibrary.findById(this.libraries, tagInfo.attr.name),
+        snippet  = library.getSnippet(hint);
     
-    return true;
-  }
+    startPos.ch = 0;
+    
+    // Add an end position to overwrite the
+    // entire line
+    var endPos = {
+      line: startPos.line,
+      ch: startPos.ch + snippet.length
+    };
+    
+    document.replaceRange(snippet, startPos, endPos);
+  };
 
   exports.CDNHints = CDNHints;
 });
