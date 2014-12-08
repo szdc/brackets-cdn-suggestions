@@ -1,6 +1,6 @@
 {
   "name": "szdc.cdn-suggestions",
-  "title": "JS/CSS CDN Suggestions",
+  "title": "JavaScript & CSS CDN Suggestions",
   "description": "Provides JavaScript and CSS suggestions for libraries hosted on Google's CDN.",
   "homepage": "https://github.com/szdc/brackets-cdn-suggestions",
   "version": "1.0.0",
