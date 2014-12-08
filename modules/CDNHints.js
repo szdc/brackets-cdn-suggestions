@@ -39,7 +39,12 @@ define(function (require, exports, module) {
     var pos     = editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(editor, pos);
     
-    if (tagInfo.tagName === 'script') {
+    console.log(tagInfo);
+    if (
+      tagInfo.tagName === 'script' && 
+      tagInfo.position.tokenType === 'attr.name' &&
+      tagInfo.attr.name.length === 0
+    ) {
       return true;
     }
     
@@ -64,13 +69,48 @@ define(function (require, exports, module) {
    * }}
    */
   CDNHints.prototype.getHints = function (implicitChar) {
-    var libraryNames = this.libraries.map(function (library) {
+    var pos     = this.editor.getCursorPos(),
+        tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
+        filter  = new RegExp(tagInfo.attr.name, 'i');
+
+    var libraryNames = this.libraries
+    .map(function (library) {
       return library.getName();
+    })
+    .filter(function (libraryName) { 
+      return filter.test(libraryName);
     });
+    
+    if (tagInfo.attr.name.length === 0) {
+      // Sort alphabetically
+      libraryNames.sort();
+    } else {
+      // Sort based on the location of the current attribute
+      libraryNames.sort(compareByStrPos);
+    }
+
+    /**
+     * Compares two string based on the position of the
+     * attribute name `tagInfo.attr.name` (RegExp `filter`).
+     * This method uses a regular expression to for its
+     * case-insensitivity flag.
+     */
+    function compareByStrPos(a, b) {
+      var aIndex = filter.exec(a).index;
+      var bIndex = filter.exec(b).index;
+
+      if (aIndex < bIndex) {
+        return -1;
+      } else if (aIndex > bIndex) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
     
     return {
       hints: libraryNames,
-      match: null,
+      match: tagInfo.attr.name,
       selectInitial: true,
       handleWideResults: false
     };
