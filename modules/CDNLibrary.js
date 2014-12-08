@@ -47,10 +47,15 @@ define(function (require, exports, module) {
       return name;
     }
     
+    function getId() {
+      return id;
+    }
+    
     return {
       getLatestSnippet: getLatestSnippet,
       getSnippets:      getSnippets,
-      getName:          getName
+      getName:          getName,
+      getId:            getId
     };
   }
   
