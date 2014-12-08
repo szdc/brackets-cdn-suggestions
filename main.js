@@ -9,7 +9,7 @@ define(function (require, exports, module) {
   
   var CodeHintManager = brackets.getModule('editor/CodeHintManager'),
       CDNLibrary      = require('modules/CDNLibrary'),
-      CDNHints        = require('modules/CDNHints').CDNHints;
+      CDNHintProvider = require('modules/CDNHintProvider').CDNHintProvider;
   
   // Constants
   var GOOGLE_HOSTED_LIBRARIES_URL = 'https://developers.google.com/speed/libraries/devguide',
@@ -50,8 +50,8 @@ define(function (require, exports, module) {
       }
     }
     
-    var cdnHints = new CDNHints(cdnLibraries);
-    CodeHintManager.registerHintProvider(cdnHints, ['html'], 1);
+    var cdnHintProvider = new CDNHintProvider(cdnLibraries);
+    CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 1);
   }
   
   downloadSource(GOOGLE_HOSTED_LIBRARIES_URL, onDownloadComplete);  

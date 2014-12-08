@@ -13,7 +13,7 @@ define(function (require, exports, module) {
    * @param {Array<Library>}
    * An array of Library objects.
    */
-  function CDNHints(cdnLibraries) {
+  function CDNHintProvider(cdnLibraries) {
     this.libraries = cdnLibraries;
   }
   
@@ -32,7 +32,7 @@ define(function (require, exports, module) {
    * @return {boolean} 
    * True if hints can be provided, otherwise false.
    */
-  CDNHints.prototype.hasHints = function (editor, implicitChar) {
+  CDNHintProvider.prototype.hasHints = function (editor, implicitChar) {
     this.editor = editor;
     
     var pos     = editor.getCursorPos(),
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
    * Determines if library hints are available for the current
    * editor context.
    */
-  CDNHints.prototype.hasLibraryHints = function (tagInfo) {
+  CDNHintProvider.prototype.hasLibraryHints = function (tagInfo) {
     return tagInfo.tagName === 'script' && 
            tagInfo.position.tokenType === 'attr.name' &&
            tagInfo.attr.name.length === 0;
@@ -59,7 +59,7 @@ define(function (require, exports, module) {
    * Determines if version hints are available for the current
    * editor context.
    */
-  CDNHints.prototype.hasVersionHints = function (tagInfo) {
+  CDNHintProvider.prototype.hasVersionHints = function (tagInfo) {
     return CDNLibrary.findById(this.libraries, tagInfo.attr.name) !== null;
   };
   
@@ -80,7 +80,7 @@ define(function (require, exports, module) {
    *    handleWideResults: boolean
    * }}
    */
-  CDNHints.prototype.getHints = function (implicitChar) {
+  CDNHintProvider.prototype.getHints = function (implicitChar) {
     var pos     = this.editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
         library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
@@ -96,7 +96,7 @@ define(function (require, exports, module) {
    * Returns a list of library hints for the current editor 
    * context.
    */
-  CDNHints.prototype.getLibraryHints = function (tagInfo) {
+  CDNHintProvider.prototype.getLibraryHints = function (tagInfo) {
     var filter = new RegExp(tagInfo.attr.name, 'i');
     
     var libraryNames = this.libraries
@@ -150,7 +150,7 @@ define(function (require, exports, module) {
    * Returns a list of version hints for the library in the 
    * current editor context.
    */
-  CDNHints.prototype.getVersionHints = function (library) {
+  CDNHintProvider.prototype.getVersionHints = function (library) {
     if (library === null) {
       return null;
     }
@@ -173,7 +173,7 @@ define(function (require, exports, module) {
    * Indicates whether the manager should follow hint 
    * insertion with an explicit hint request.
    */
-  CDNHints.prototype.insertHint = function (hint) {
+  CDNHintProvider.prototype.insertHint = function (hint) {
     var pos     = this.editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
         library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
@@ -190,7 +190,7 @@ define(function (require, exports, module) {
   /**
    * Inserts the selected library ID.
    */
-  CDNHints.prototype.insertLibraryId = function (hint) {
+  CDNHintProvider.prototype.insertLibraryId = function (hint) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
@@ -215,7 +215,7 @@ define(function (require, exports, module) {
    * Inserts the HTML snippet for the selected library and
    * version
    */
-  CDNHints.prototype.insertLibrarySnippet = function (hint) {
+  CDNHintProvider.prototype.insertLibrarySnippet = function (hint) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
@@ -234,5 +234,5 @@ define(function (require, exports, module) {
     document.replaceRange(snippet, startPos, endPos);
   };
 
-  exports.CDNHints = CDNHints;
+  exports.CDNHintProvider = CDNHintProvider;
 });
