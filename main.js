@@ -21,8 +21,11 @@ define(function (require, exports, module) {
   /**
    * Downloads and parses the Google Hosted Libraries webpage.
    *
-   * @param {String}   The URL of the webpage to download
-   * @param {Function} A callback that handles the response
+   * @param {String}   
+   * The URL of the webpage to download.
+   *
+   * @param {Function} 
+   * A callback that handles the response.
    */
   function downloadSource(url, callback) {
     var req = new XMLHttpRequest();

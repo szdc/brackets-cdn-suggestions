@@ -6,9 +6,27 @@ define(function (require, exports, module) {
   
   /**
    * Represents a JavaScript library hosted by Google.
+   *
+   * @param {String} id
+   * The id of the library element, e.g. angularjs
+   *
+   * @param {String} name
+   * The name of the library, e.g. Angular JS
+   *
+   * @param {String} snippet
+   * The latest version's HTML snippet for the library
+   * e.g. <script src="..."></script>
+   *
+   * @param {Array<String>} versions
+   * An array of hosted version numbers of the library
+   * e.g. [1.3.5, 1.3.4, 1.3.2]
+   *
+   * @return {Object}
+   * An object containing public methods exposed by
+   * the class.
    */
-  function Library(name, snippet, versions) {
-    if (name === null || snippet === null || versions === null || versions.length < 1) {
+  function Library(id, name, snippet, versions) {
+    if (arguments.length !== 4 || versions.length < 1) {
       return null;
     }
     
@@ -25,9 +43,14 @@ define(function (require, exports, module) {
       return snippets;
     }
     
+    function getName() {
+      return name;
+    }
+    
     return {
       getLatestSnippet: getLatestSnippet,
-      getSnippets:      getSnippets
+      getSnippets:      getSnippets,
+      getName:          getName
     };
   }
   
@@ -36,7 +59,8 @@ define(function (require, exports, module) {
    * from Google's Hosted Library webpage.
    */
   Library.fromElement = function (element) {
-    var name      = element.id,
+    var id        = element.id,
+        name      = element.querySelector('dt').textContent,
         snippet   = element.querySelector('.snippet').textContent || '',
         versions  = element.querySelector('span.versions').innerHTML;
     
@@ -52,8 +76,30 @@ define(function (require, exports, module) {
     versions = versions.replace(/\s+/g, '');
     versions = versions.split(',');
     
-    return new Library(name, snippet, versions);
-  }
+    return new Library(id, name, snippet, versions);
+  };
+  
+  /**
+   * Returns the library with the name specified given
+   * the array of libraries supplied,or null if none 
+   * was found.
+   *
+   * @param {Array<Library>} libraries
+   * The array of Library objects to search.
+   *
+   * @param {String} name
+   * The name of the library to search for.
+   */
+  Library.findByName = function (libraries, name) {
+    for (var i = 0; i < libraries.length; i++) {
+      var library = libraries[i];
+      if (library.getName() === name) {
+        return library;
+      }
+    }
+    return null;
+  };
   
   exports.fromElement = Library.fromElement;
+  exports.findByName  = Library.findByName;
 });
