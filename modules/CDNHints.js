@@ -4,13 +4,13 @@
 define(function (require, exports, module) {
   'use strict';
   
-  var HTMLUtils       = brackets.getModule('language/HTMLUtils'),
-      CDNLibrary      = require('modules/CDNLibrary');
+  var HTMLUtils  = brackets.getModule('language/HTMLUtils'),
+      CDNLibrary = require('modules/CDNLibrary');
   
   /**
    * Represents a CodeHintProvider
    *
-   * @param {Array<Library}
+   * @param {Array<Library>}
    * An array of Library objects.
    */
   function CDNHints(cdnLibraries) {
