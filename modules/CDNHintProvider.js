@@ -50,9 +50,14 @@ define(function (require, exports, module) {
    * editor context.
    */
   CDNHintProvider.prototype.hasLibraryHints = function (tagInfo) {
-    return tagInfo.tagName === 'script' && 
-           tagInfo.position.tokenType === 'attr.name' &&
-           tagInfo.attr.name.length === 0;
+    var pos         = this.editor.getCursorPos(),
+        tagStartPos = this.editor.document.getLine(pos.line);
+    
+    var result = tagInfo.tagName === 'script' && 
+        tagInfo.position.tokenType === 'attr.name' &&
+        tagInfo.attr.name.length === 0;
+
+    return result;
   };
   
   /**
@@ -85,6 +90,10 @@ define(function (require, exports, module) {
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
         library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
 
+    if (tagInfo.position.tokenType !== 'attr.name') {
+      return null;
+    }
+    
     if (library === null) {
       return this.getLibraryHints(tagInfo);
     } else {
