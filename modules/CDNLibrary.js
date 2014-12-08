@@ -39,8 +39,8 @@ define(function (require, exports, module) {
       return snippet;
     }
     
-    function getSnippets() {
-      return snippets;
+    function getVersions() {
+      return versions;
     }
     
     function getName() {
@@ -53,7 +53,7 @@ define(function (require, exports, module) {
     
     return {
       getLatestSnippet: getLatestSnippet,
-      getSnippets:      getSnippets,
+      getVersions:      getVersions,
       getName:          getName,
       getId:            getId
     };
@@ -86,7 +86,7 @@ define(function (require, exports, module) {
   
   /**
    * Returns the library with the name specified given
-   * the array of libraries supplied,or null if none 
+   * the array of libraries supplied, or null if none 
    * was found.
    *
    * @param {Array<Library>} libraries
@@ -105,6 +105,28 @@ define(function (require, exports, module) {
     return null;
   };
   
+  /**
+   * Returns the library with the id specified given
+   * the array of libraries supplied, or null if none 
+   * was found.
+   *
+   * @param {Array<Library>} libraries
+   * The array of Library objects to search.
+   *
+   * @param {String} id
+   * The id of the library to search for.
+   */
+  Library.findById = function (libraries, id) {
+    for (var i = 0; i < libraries.length; i++) {
+      var library = libraries[i];
+      if (library.getId() === id) {
+        return library;
+      }
+    }
+    return null;
+  };
+  
   exports.fromElement = Library.fromElement;
   exports.findByName  = Library.findByName;
+  exports.findById    = Library.findById;
 });

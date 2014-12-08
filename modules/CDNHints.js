@@ -47,6 +47,11 @@ define(function (require, exports, module) {
       return true;
     }
     
+    if (CDNLibrary.findById(this.libraries, tagInfo.attr.name)) {
+      console.log('Tag found: ' + tagInfo.attr.name);
+      return true;
+    }
+    
     return false;
   }
   
@@ -70,8 +75,22 @@ define(function (require, exports, module) {
   CDNHints.prototype.getHints = function (implicitChar) {
     var pos     = this.editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
-        filter  = new RegExp(tagInfo.attr.name, 'i');
+        library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
 
+    if (library === null) {
+      return this.getLibraryHints(implicitChar, tagInfo);
+    } else {
+      return this.getVersionHints(implicitChar, library);
+    }
+  }
+  
+  /**
+   * Returns a list of library hints for the current editor 
+   * context.
+   */
+  CDNHints.prototype.getLibraryHints = function (implicitChar, tagInfo) {
+    var filter = new RegExp(tagInfo.attr.name, 'i');
+    
     var libraryNames = this.libraries
     .map(function (library) {
       return library.getName();
@@ -120,6 +139,23 @@ define(function (require, exports, module) {
   }
   
   /**
+   * Returns a list of version hints for the library in the 
+   * current editor context.
+   */
+  CDNHints.prototype.getVersionHints = function (implicitChar, library) {
+    if (library === null) {
+      return null;
+    }
+    
+    return {
+      hints: library.getVersions(),
+      match: null,
+      selectInitial: true,
+      handleWideResults: false
+    };
+  }
+  
+  /**
    * Inserts a hint into the current editor context.
    *
    * @param {string} hint
@@ -132,10 +168,11 @@ define(function (require, exports, module) {
   CDNHints.prototype.insertHint = function (hint) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
+        tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
         library  = CDNLibrary.findByName(this.libraries, hint);
     
     var snippet = library.getId();
-    startPos.ch = 0;
+    startPos.ch -= tagInfo.attr.name.length;
     
     var endPos = {
       line: startPos.line,
