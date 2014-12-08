@@ -1,7 +1,7 @@
 Brackets Extension: CDN Suggestions
 =========================
 
-Provides JavaScript library suggestions for libraries hosted on [Google's CDN](https://developers.google.com/speed/libraries/devguide) (e.g. AngularJS, jQuery).
+Provides JavaScript library suggestions for libraries hosted on [Google's CDN](https://developers.google.com/speed/libraries/devguide) (e.g. AngularJS, jQuery).  Thanks to [ByteBlast](https://github.com/ByteBlast) for the idea!
 
 ## Usage
 1. Start typing a script tag as you normally would: `<script `
