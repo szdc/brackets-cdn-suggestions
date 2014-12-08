@@ -82,10 +82,17 @@ define(function (require, exports, module) {
     
     if (tagInfo.attr.name.length === 0) {
       // Sort alphabetically
-      libraryNames.sort();
+      libraryNames.sort(compareAlphabetically);
     } else {
       // Sort based on the location of the current attribute
       libraryNames.sort(compareByStrPos);
+    }
+    
+    /**
+     * Compares two strings based on their character positions.
+     */
+    function compareAlphabetically(a, b) {
+      return a.toLowerCase().localeCompare(b.toLowerCase());
     }
 
     /**
@@ -95,15 +102,12 @@ define(function (require, exports, module) {
      * case-insensitivity flag.
      */
     function compareByStrPos(a, b) {
-      var aIndex = filter.exec(a).index;
-      var bIndex = filter.exec(b).index;
-
-      if (aIndex < bIndex) {
-        return -1;
-      } else if (aIndex > bIndex) {
-        return 1;
+      var difference = filter.exec(a).index - filter.exec(b).index
+      
+      if (difference === 0) {
+        return a.localeCompare(b);
       } else {
-        return 0;
+        return difference;
       }
     }
     
@@ -130,7 +134,7 @@ define(function (require, exports, module) {
         startPos = this.editor.getCursorPos(),
         library  = CDNLibrary.findByName(this.libraries, hint);
     
-    var snippet = library.getLatestSnippet();
+    var snippet = library.getId();
     startPos.ch = 0;
     
     var endPos = {
