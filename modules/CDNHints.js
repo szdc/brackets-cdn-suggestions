@@ -38,21 +38,29 @@ define(function (require, exports, module) {
     var pos     = editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(editor, pos);
     
-    console.log(tagInfo);
-    if (
-      tagInfo.tagName === 'script' && 
-      tagInfo.position.tokenType === 'attr.name' &&
-      tagInfo.attr.name.length === 0
-    ) {
+    if (this.hasLibraryHints(tagInfo) || this.hasVersionHints(tagInfo)) {
       return true;
+    } else {
+      return false;
     }
-    
-    if (CDNLibrary.findById(this.libraries, tagInfo.attr.name)) {
-      console.log('Tag found: ' + tagInfo.attr.name);
-      return true;
-    }
-    
-    return false;
+  }
+  
+  /**
+   * Determines if library hints are available for the current
+   * editor context.
+   */
+  CDNHints.prototype.hasLibraryHints = function (tagInfo) {
+    return tagInfo.tagName === 'script' && 
+           tagInfo.position.tokenType === 'attr.name' &&
+           tagInfo.attr.name.length === 0;
+  }
+  
+  /**
+   * Determines if version hints are available for the current
+   * editor context.
+   */
+  CDNHints.prototype.hasVersionHints = function (tagInfo) {
+    return CDNLibrary.findById(this.libraries, tagInfo.attr.name) !== null;
   }
   
   /**
@@ -78,9 +86,9 @@ define(function (require, exports, module) {
         library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
 
     if (library === null) {
-      return this.getLibraryHints(implicitChar, tagInfo);
+      return this.getLibraryHints(tagInfo);
     } else {
-      return this.getVersionHints(implicitChar, library);
+      return this.getVersionHints(library);
     }
   }
   
@@ -88,7 +96,7 @@ define(function (require, exports, module) {
    * Returns a list of library hints for the current editor 
    * context.
    */
-  CDNHints.prototype.getLibraryHints = function (implicitChar, tagInfo) {
+  CDNHints.prototype.getLibraryHints = function (tagInfo) {
     var filter = new RegExp(tagInfo.attr.name, 'i');
     
     var libraryNames = this.libraries
@@ -142,7 +150,7 @@ define(function (require, exports, module) {
    * Returns a list of version hints for the library in the 
    * current editor context.
    */
-  CDNHints.prototype.getVersionHints = function (implicitChar, library) {
+  CDNHints.prototype.getVersionHints = function (library) {
     if (library === null) {
       return null;
     }
