@@ -5,7 +5,6 @@ define(function (require, exports, module) {
   'use strict';
   
   var HTMLUtils       = brackets.getModule('language/HTMLUtils'),
-      DocumentManager = brackets.getModule('document/DocumentManager'),
       CDNLibrary      = require('modules/CDNLibrary');
   
   /**
