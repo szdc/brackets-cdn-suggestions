@@ -29,12 +29,14 @@ define(function (require, exports, module) {
     if (arguments.length !== 4 || versions.length < 1) {
       return null;
     }
+
+    var regexVersion = new RegExp('/\\d\+(.\\d\+)+/', 'g');
     
     function getSnippet(version) {
       if (typeof version === 'undefined') {
         return latestSnippet;
       } else {
-        return latestSnippet.replace(new RegExp(versions[0], 'g'), version);
+        return latestSnippet.replace(regexVersion, '/' + version + '/');
       }
     }
     
