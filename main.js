@@ -15,9 +15,6 @@ define(function (require, exports, module) {
   var GOOGLE_HOSTED_LIBRARIES_URL = 'https://developers.google.com/speed/libraries/devguide',
       SELECTOR_LIBRARIES = 'div[itemprop=articleBody] > div[id]';
   
-  // Fields
-  var cdnLibraries = [];
-  
   /**
    * Downloads and parses the Google Hosted Libraries webpage.
    *
@@ -43,6 +40,7 @@ define(function (require, exports, module) {
   }
   
   function parseLibraries(libElements) {
+    var cdnLibraries = [];
     for (var i = 0; i < libElements.length; i++) {
       var element = libElements[i],
           cdnLibrary = CDNLibrary.fromElement(element);
@@ -56,7 +54,5 @@ define(function (require, exports, module) {
     CodeHintManager.registerHintProvider(cdnHints, ['html'], 1);
   }
   
-  downloadSource(GOOGLE_HOSTED_LIBRARIES_URL, onDownloadComplete);
-  
-  
+  downloadSource(GOOGLE_HOSTED_LIBRARIES_URL, onDownloadComplete);  
 });
