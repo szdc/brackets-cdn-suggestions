@@ -14,5 +14,5 @@ Provides JavaScript library suggestions for libraries hosted on [Google's CDN](h
 ### Preview
 ![CDN Suggestions Preview](http://i.imgur.com/noV7YHF.gif)
 
-## To-do
-Publish to the Brackets extension registry
+## Installation
+In Brackets, choose File > Extension Manager and click on the Available tab.  Then search for `cdn suggestions`.
