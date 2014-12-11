@@ -16,3 +16,6 @@ Provides JavaScript library suggestions for libraries hosted on [Google's CDN](h
 
 ## Installation
 In Brackets, choose File > Extension Manager and click on the Available tab.  Then search for `cdn suggestions`.
+
+## Roadmap
+The next step is to support a broader range of CDN services (e.g. [CDNJS](https://cdnjs.com/)) using the API by [jsDelivr](https://github.com/jsdelivr/api) - development is taking place in [branch v2](https://github.com/szdc/brackets-cdn-suggestions/tree/v2).
