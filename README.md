@@ -20,5 +20,5 @@ This extension uses the [jsDelivr API](https://github.com/jsdelivr/api) to find 
 In Brackets, choose File > Extension Manager and click on the Available tab.  Then search for `cdn suggestions`.
 
 ## Roadmap
-Development is currently focused on fixing existing [issues and planned enhancements](https://github.com/szdc/brackets-cdn-suggestions/issues)
+Development is currently focused on fixing existing [issues and planned enhancements](https://github.com/szdc/brackets-cdn-suggestions/issues).
 A future feature might include a preference to select a CDN after choosing a version.
