@@ -4,55 +4,48 @@
 define(function (require, exports, module) {
   'use strict';
   
-  // Modules
-  require('modules/DOMParser');
-  
+  // Brackets modules
   var CodeHintManager = brackets.getModule('editor/CodeHintManager'),
-      CDNLibrary      = require('modules/CDNLibrary'),
-      CDNHintProvider = require('modules/CDNHintProvider').CDNHintProvider;
+      ExtensionUtils  = brackets.getModule('utils/ExtensionUtils');
   
-  // Constants
-  var GOOGLE_HOSTED_LIBRARIES_URL = 'https://developers.google.com/speed/libraries/devguide',
-      SELECTOR_LIBRARIES = 'div[itemprop=articleBody] > div[id]';
+  // Extension modules
+  var CDNHintProvider = require('modules/CDNHintProvider').CDNHintProvider,
+      LibraryList     = require('modules/CDNLibraryList').LibraryList,
+      API             = require('modules/jsdelivrAPI'),
+      CDNs            = JSON.parse(require('text!modules/CDNInfo.json'));
   
   /**
-   * Downloads and parses the Google Hosted Libraries webpage.
-   *
-   * @param {String}   
-   * The URL of the webpage to download.
-   *
-   * @param {Function} 
-   * A callback that handles the response.
+   * Downloads libraries from the specified array
+   * of CDNs.
    */
-  function downloadSource(url, callback) {
-    var req = new XMLHttpRequest();
-    req.onload = callback;
-    req.open('get', url);
-    req.overrideMimeType('text/html; charset=x-user-defined');
-    req.send();
-  }
-
-  function onDownloadComplete() {
-    var parser    = new DOMParser();
-    var document  = parser.parseFromString(this.responseText, 'text/html');
-    var libElements = document.body.querySelectorAll(SELECTOR_LIBRARIES);
-    parseLibraries(libElements);
+  function downloadLibraries(cdns, callback) {
+    var libraryList = new LibraryList(),
+        cdnResponses = 0;
+    
+    cdns.forEach(function (cdn) {
+      API.getLibraries(cdn.name, function (err, libraries) {
+        if (err) {
+          console.log(err);
+        } else {
+          libraryList.addCDN(cdn.name, libraries);
+        }
+        
+        cdnResponses++;
+        console.log('Downloaded', cdnResponses, 'of', cdns.length, 'CDNs.');
+        if (cdnResponses === cdns.length) {
+          callback(libraryList);
+        }
+      });
+    });
   }
   
-  function parseLibraries(libElements) {
-    var cdnLibraries = [];
-    for (var i = 0; i < libElements.length; i++) {
-      var element = libElements[i],
-          cdnLibrary = CDNLibrary.fromElement(element);
-
-      if (cdnLibrary !== null) {
-        cdnLibraries.push(cdnLibrary);
-      }
-    }
-    
-    var cdnHintProvider = new CDNHintProvider(cdnLibraries);
+  /**
+   * Registers a hint provider for the extension.
+   */
+  function registerHintProvider(libraryList) {
+    var cdnHintProvider = new CDNHintProvider(libraryList);
     CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 1);
   }
   
-  downloadSource(GOOGLE_HOSTED_LIBRARIES_URL, onDownloadComplete);  
+  downloadLibraries(CDNs, registerHintProvider);
 });
