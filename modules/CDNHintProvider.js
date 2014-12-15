@@ -54,7 +54,7 @@ define(function (require, exports, module) {
     var pos         = this.editor.getCursorPos(),
         tagStartPos = this.editor.document.getLine(pos.line);
     
-    var result = tagInfo.tagName === 'script' && 
+    var result = (tagInfo.tagName === 'script' || tagInfo.tagName === 'link')
         tagInfo.position.tokenType === 'attr.name' &&
         tagInfo.attr.name.length === 0;
 
