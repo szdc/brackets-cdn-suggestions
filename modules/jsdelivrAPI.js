@@ -44,6 +44,5 @@ define(function (require, exports, module) {
     downloadLibraries(cdn, onDownloadComplete);
   }
 
-  exports.CDN = CDN;
   exports.getLibraries = getLibraries;
 });
