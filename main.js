@@ -12,7 +12,7 @@ define(function (require, exports, module) {
   var CDNHintProvider = require('modules/CDNHintProvider').CDNHintProvider,
       LibraryList     = require('modules/CDNLibraryList').LibraryList,
       API             = require('modules/jsdelivrAPI'),
-      CDNs            = JSON.parse(require('text!modules/CDNInfo.json'));
+      CDNs            = JSON.parse(require('text!modules/CDNs.json'));
   
   /**
    * Downloads libraries from the specified array
@@ -43,6 +43,7 @@ define(function (require, exports, module) {
    * Registers a hint provider for the extension.
    */
   function registerHintProvider(libraryList) {
+    console.log('Total libraries: ' + libraryList.getLibraryNames().length);
     var cdnHintProvider = new CDNHintProvider(libraryList);
     CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 1);
   }
