@@ -13,10 +13,5 @@
     "name": "jsDelivr",
     "apiName": "jsdelivr",
     "url": "//cdnjs.cloudflare.com/ajax/libs/"
-  },
-  {
-    "name": "Bootstrap",
-    "apiName": "bootstrap",
-    "url": "//maxcdn.bootstrapcdn.com/"
   }
 ]
