@@ -10,11 +10,12 @@ define(function (require, exports, module) {
   /**
    * Represents a CodeHintProvider
    *
-   * @param {Array<Library>}
-   * An array of Library objects.
+   * @param {LibraryList}
+   * A LibraryList instance containing the available
+   * libraries.
    */
-  function CDNHintProvider(cdnLibraries) {
-    this.libraries = cdnLibraries;
+  function CDNHintProvider(libraryList) {
+    this.libraryList = libraryList;
   }
   
   /**
@@ -53,7 +54,7 @@ define(function (require, exports, module) {
     var pos         = this.editor.getCursorPos(),
         tagStartPos = this.editor.document.getLine(pos.line);
     
-    var result = tagInfo.tagName === 'script' && 
+    var result = (tagInfo.tagName === 'script' || tagInfo.tagName === 'link')
         tagInfo.position.tokenType === 'attr.name' &&
         tagInfo.attr.name.length === 0;
 
@@ -65,7 +66,7 @@ define(function (require, exports, module) {
    * editor context.
    */
   CDNHintProvider.prototype.hasVersionHints = function (tagInfo) {
-    return CDNLibrary.findById(this.libraries, tagInfo.attr.name) !== null;
+    return this.libraryList.findById(tagInfo.attr.name) !== null;
   };
   
   /**
@@ -88,7 +89,7 @@ define(function (require, exports, module) {
   CDNHintProvider.prototype.getHints = function (implicitChar) {
     var pos     = this.editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
-        library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
+        library = this.libraryList.findById(tagInfo.attr.name);
 
     if (tagInfo.position.tokenType !== 'attr.name') {
       return null;
@@ -108,18 +109,12 @@ define(function (require, exports, module) {
   CDNHintProvider.prototype.getLibraryHints = function (tagInfo) {
     var filter = new RegExp(tagInfo.attr.name, 'i');
     
-    var libraryNames = this.libraries
-    .map(function (library) {
-      return library.getName();
-    })
-    .filter(function (libraryName) { 
+    var libraryNames = this.libraryList.getLibraryNames()
+    .filter(function (libraryName) {
       return filter.test(libraryName);
     });
     
-    if (tagInfo.attr.name.length === 0) {
-      // Sort alphabetically
-      libraryNames.sort(compareAlphabetically);
-    } else {
+    if (tagInfo.attr.name.length !== 0) {
       // Sort based on the location of the current attribute
       libraryNames.sort(compareByStrPos);
     }
@@ -148,7 +143,7 @@ define(function (require, exports, module) {
     }
     
     return {
-      hints: libraryNames,
+      hints: libraryNames.splice(0, 25),
       match: tagInfo.attr.name,
       selectInitial: true,
       handleWideResults: false
@@ -185,8 +180,8 @@ define(function (require, exports, module) {
   CDNHintProvider.prototype.insertHint = function (hint) {
     var pos     = this.editor.getCursorPos(),
         tagInfo = HTMLUtils.getTagInfo(this.editor, pos),
-        library = CDNLibrary.findById(this.libraries, tagInfo.attr.name);
-
+        library = this.libraryList.findById(tagInfo.attr.name);
+    
     if (library === null) {
       this.insertLibraryId(hint);
       return true;
@@ -203,7 +198,7 @@ define(function (require, exports, module) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
-        library  = CDNLibrary.findByName(this.libraries, hint),
+        library  = this.libraryList.findByName(hint),
         snippet  = library.getId();
     
     // Account for the user having typed part of 
@@ -228,7 +223,7 @@ define(function (require, exports, module) {
     var document = this.editor.document,
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
-        library  = CDNLibrary.findById(this.libraries, tagInfo.attr.name),
+        library  = this.libraryList.findById(tagInfo.attr.name),
         snippet  = library.getSnippet(hint);
     
     startPos.ch = 0;

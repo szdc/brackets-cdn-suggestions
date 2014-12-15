@@ -3,131 +3,182 @@
 
 define(function (require, exports, module) {
   'use strict';
-  
+
+  var CDNs = JSON.parse(require('text!modules/CDNs.json'));
+  var TAGS = {
+    SCRIPT: '<script src="{url}"></script>',
+    CSS:    '<link rel="stylesheet" href="{url}" />'
+  };
+
   /**
-   * Represents a JavaScript library hosted by Google.
-   *
-   * @param {String} id
-   * The id of the library element, e.g. angularjs
-   *
-   * @param {String} name
-   * The name of the library, e.g. Angular JS
-   *
-   * @param {String} latestSnippet
-   * The latest version's HTML snippet for the library
-   * e.g. <script src="..."></script>
-   *
-   * @param {Array<String>} versions
-   * An array of hosted version numbers of the library
-   * e.g. [1.3.5, 1.3.4, 1.3.2]
-   *
-   * @return {Object}
-   * An object containing public methods exposed by
-   * the class.
+   * Represents a JS/CSS library.
    */
-  function Library(id, name, latestSnippet, versions) {
-    if (arguments.length !== 4 || versions.length < 1) {
+  function Library(libraryName) {
+    var id         = normalizeName(libraryName),
+        name       = libraryName,
+        tag        = '',
+        cdns       = [],
+        versions   = [];
+
+    /**
+     * Returns a name with only its alphanumeric characters
+     * converted to lowercase.
+     * Essential because each CDN could have a slightly different
+     * name for the same library, for example:
+     * angular.js, angularjs, AngularJS, Angular JS
+     */
+    function normalizeName(libName) {
+      return libName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    /**
+     * Adds the versions supported by a CDN to the array.
+     *
+     * @param cdn {String}
+     * The name of the CDN that hosts this library.
+     *
+     * @param cdnLibrary {Object}
+     * An object that represents the JSON response from a
+     * jsDelivr API library query.
+     */
+    function addCDNInfo(cdnName, cdnLibrary) {
+      if (cdns.length === 0) {
+        tag = getTag(cdnLibrary.mainfile || cdnLibrary.name);
+      }
+      
+      cdns.push(new CDNInfo(
+        cdnName,
+        cdnLibrary.name,
+        cdnLibrary.mainfile, 
+        cdnLibrary.versions
+      ));
+      
+      cdnLibrary.versions.forEach(function (version) {
+        if (versions.indexOf(version) === -1) {
+          versions.push(version);
+        }
+      });
+      
+      versions.sort(compareVersions);
+    }
+
+    /**
+     * Compares version numbers for sorting.
+     */
+    function compareVersions(a, b) {
+      if (a > b) {
+        return -1;
+      } else if (a < b) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    /**
+     * Determines if two libraries share the same name.
+     */
+    function matches(libraryName) {
+      return id === normalizeName(libraryName);
+    }
+
+    /**
+     * Returns the HTML snippet associated with the
+     * specified version number.
+     */
+    function getSnippet(version) {
+      var url = getURL(version);
+      return tag.replace('{url}', url);
+    }
+
+    /**
+     * Generates the URL for a specific version number.
+     */
+    function getURL(version) {
+      for (var i = 0; i < cdns.length; i++) {
+        var cdn = cdns[i];
+        if (cdn.versions.indexOf(version) !== -1) {
+          return getCDNLink(cdn.cdnName) + 
+                 cdn.name + '/' + 
+                 version + '/' + 
+                 cdn.mainfile;
+        }
+      }
+    }
+
+    /**
+     * Returns the URL to the CDN specified.
+     */
+    function getCDNLink(cdnName) {
+      for (var i = 0; i < CDNs.length; i++) {
+        var cdn = CDNs[i];
+        if (cdn.name === cdnName) {
+          return cdn.url;
+        }
+      }
       return null;
     }
 
-    var regexVersion = new RegExp('/\\d\+(.\\d\+)+/', 'g');
-    
-    function getSnippet(version) {
-      if (typeof version === 'undefined') {
-        return latestSnippet;
+    /**
+     * Returns the HTML tag snippet associated with the
+     * library type (JS/CSS).
+     */
+    function getTag(fileName) {
+      if (fileName.indexOf('.css') === (fileName.length - 4)) {
+        return TAGS.CSS;
       } else {
-        return latestSnippet.replace(regexVersion, '/' + version + '/');
+        return TAGS.SCRIPT;
       }
     }
-    
-    function getVersions() {
-      return versions;
-    }
-    
+
+    /**
+     * Returns the name of the library.
+     */
     function getName() {
       return name;
     }
-    
+
+    /**
+     * Returns the id of the library.
+     */
     function getId() {
       return id;
     }
-    
+
+    /**
+     * Returns an array of hosted versions of the library.
+     */
+    function getVersions() {
+      return versions;
+    }
+
+    /**
+     * Represents information about a CDN specific to
+     * the library.
+     */
+    function CDNInfo(cdnName, name, mainfile, versions) {
+      this.cdnName  = cdnName;
+      this.name     = name;
+      this.mainfile = mainfile;
+      this.versions = versions;
+    }
+
     return {
-      getSnippet:       getSnippet,
-      getVersions:      getVersions,
-      getName:          getName,
-      getId:            getId
+      addCDNInfo: addCDNInfo,
+      getId: getId,
+      getName: getName,
+      getSnippet: getSnippet,
+      getVersions: getVersions,
+      matches: matches,
     };
   }
-  
-  /*
-   * Creates a Library instance from an HTML element
-   * from Google's Hosted Library webpage.
-   */
-  Library.fromElement = function (element) {
-    var id        = element.id,
-        name      = element.querySelector('dt').textContent,
-        snippet   = element.querySelector('.snippet').textContent || '',
-        versions  = element.querySelector('span.versions').innerHTML;
-    
-    // Remove the new line (and any extra spaces)
-    // that appear after the tag name
-    snippet = snippet.replace(/\s{2,}(?=\w)/g, ' ');
-    
-    // Move the second tag to be on the line below 
-    // and in-line with the first tag (where applicable)
-    snippet = snippet.replace(/\s{2,}/g, '\n');
-    
-    // Remove any spaces or new lines
-    versions = versions.replace(/\s+/g, '');
-    versions = versions.split(',');
-    
-    return new Library(id, name, snippet, versions);
-  };
-  
+
   /**
-   * Returns the library with the name specified given
-   * the array of libraries supplied, or null if none 
-   * was found.
-   *
-   * @param {Array<Library>} libraries
-   * The array of Library objects to search.
-   *
-   * @param {String} name
-   * The name of the library to search for.
+   * Compares ids for sorting.
    */
-  Library.findByName = function (libraries, name) {
-    for (var i = 0; i < libraries.length; i++) {
-      var library = libraries[i];
-      if (library.getName() === name) {
-        return library;
-      }
-    }
-    return null;
+  Library.compareIds = function(a, b) {
+    return a.getId().localeCompare(b.getId());
   };
-  
-  /**
-   * Returns the library with the id specified given
-   * the array of libraries supplied, or null if none 
-   * was found.
-   *
-   * @param {Array<Library>} libraries
-   * The array of Library objects to search.
-   *
-   * @param {String} id
-   * The id of the library to search for.
-   */
-  Library.findById = function (libraries, id) {
-    for (var i = 0; i < libraries.length; i++) {
-      var library = libraries[i];
-      if (library.getId() === id) {
-        return library;
-      }
-    }
-    return null;
-  };
-  
-  exports.fromElement = Library.fromElement;
-  exports.findByName  = Library.findByName;
-  exports.findById    = Library.findById;
+
+  exports.Library = Library;
 });

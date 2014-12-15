@@ -1,0 +1,17 @@
+[
+  {
+    "name": "CDNJS",
+    "apiName": "cdnjs",
+    "url": "//cdnjs.cloudflare.com/ajax/libs/"
+  },
+  {
+    "name": "Google",
+    "apiName": "google",
+    "url": "//ajax.googleapis.com/ajax/libs/"
+  },
+  {
+    "name": "jsDelivr",
+    "apiName": "jsdelivr",
+    "url": "//cdn.jsdelivr.net/"
+  }
+]
