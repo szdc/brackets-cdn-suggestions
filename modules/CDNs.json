@@ -12,6 +12,6 @@
   {
     "name": "jsDelivr",
     "apiName": "jsdelivr",
-    "url": "//cdnjs.cloudflare.com/ajax/libs/"
+    "url": "//cdn.jsdelivr.net/"
   }
 ]
