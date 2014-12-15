@@ -5,129 +5,57 @@ define(function (require, exports, module) {
   'use strict';
   
   /**
-   * Represents a JavaScript library hosted by Google.
-   *
-   * @param {String} id
-   * The id of the library element, e.g. angularjs
-   *
-   * @param {String} name
-   * The name of the library, e.g. Angular JS
-   *
-   * @param {String} latestSnippet
-   * The latest version's HTML snippet for the library
-   * e.g. <script src="..."></script>
-   *
-   * @param {Array<String>} versions
-   * An array of hosted version numbers of the library
-   * e.g. [1.3.5, 1.3.4, 1.3.2]
-   *
-   * @return {Object}
-   * An object containing public methods exposed by
-   * the class.
+   * Represents a JS/CSS library.
    */
-  function Library(id, name, latestSnippet, versions) {
-    if (arguments.length !== 4 || versions.length < 1) {
-      return null;
-    }
-
-    var regexVersion = new RegExp('/\\d\+(.\\d\+)+/', 'g');
+  function Library(libraryName) {
+    var id = normalizeName(libraryName),
+        name = libraryName,
+        cdns = [],
+        versions = [];
     
-    function getSnippet(version) {
-      if (typeof version === 'undefined') {
-        return latestSnippet;
-      } else {
-        return latestSnippet.replace(regexVersion, '/' + version + '/');
+    /**
+     * Returns a name with only its alphanumeric characters.
+     */
+    function normalizeName(libName) {
+      return libName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+    
+    /**
+     * Adds the versions supported by a CDN to the array.
+     *
+     * @param cdn {String}
+     * The name of the CDN that hosts this library.
+     *
+     * @param cdnLibrary {Object}
+     * An object that represents the JSON response from a
+     * jsDelivr API library query.
+     */
+    function addCDNInfo(cdnName, cdnLibrary) {
+      if (cdns.indexOf(cdnName) === -1) {
+        cdns[cdnName] = cdnLibrary.mainfile;
       }
+      
+      cdnLibrary.versions.forEach(function (version) {
+        if (versions.indexOf(version) === -1) {
+          versions.push(version);
+        }
+      });
+      
+      versions.sort();
     }
     
-    function getVersions() {
-      return versions;
-    }
-    
-    function getName() {
-      return name;
-    }
-    
-    function getId() {
-      return id;
+    /**
+     * Determines if two libraries share the same name.
+     */
+    function matches(library) {
+      return name === library.name;
     }
     
     return {
-      getSnippet:       getSnippet,
-      getVersions:      getVersions,
-      getName:          getName,
-      getId:            getId
+      matches: matches,
+      addCDNInfo: addCDNInfo
     };
   }
   
-  /*
-   * Creates a Library instance from an HTML element
-   * from Google's Hosted Library webpage.
-   */
-  Library.fromElement = function (element) {
-    var id        = element.id,
-        name      = element.querySelector('dt').textContent,
-        snippet   = element.querySelector('.snippet').textContent || '',
-        versions  = element.querySelector('span.versions').innerHTML;
-    
-    // Remove the new line (and any extra spaces)
-    // that appear after the tag name
-    snippet = snippet.replace(/\s{2,}(?=\w)/g, ' ');
-    
-    // Move the second tag to be on the line below 
-    // and in-line with the first tag (where applicable)
-    snippet = snippet.replace(/\s{2,}/g, '\n');
-    
-    // Remove any spaces or new lines
-    versions = versions.replace(/\s+/g, '');
-    versions = versions.split(',');
-    
-    return new Library(id, name, snippet, versions);
-  };
-  
-  /**
-   * Returns the library with the name specified given
-   * the array of libraries supplied, or null if none 
-   * was found.
-   *
-   * @param {Array<Library>} libraries
-   * The array of Library objects to search.
-   *
-   * @param {String} name
-   * The name of the library to search for.
-   */
-  Library.findByName = function (libraries, name) {
-    for (var i = 0; i < libraries.length; i++) {
-      var library = libraries[i];
-      if (library.getName() === name) {
-        return library;
-      }
-    }
-    return null;
-  };
-  
-  /**
-   * Returns the library with the id specified given
-   * the array of libraries supplied, or null if none 
-   * was found.
-   *
-   * @param {Array<Library>} libraries
-   * The array of Library objects to search.
-   *
-   * @param {String} id
-   * The id of the library to search for.
-   */
-  Library.findById = function (libraries, id) {
-    for (var i = 0; i < libraries.length; i++) {
-      var library = libraries[i];
-      if (library.getId() === id) {
-        return library;
-      }
-    }
-    return null;
-  };
-  
-  exports.fromElement = Library.fromElement;
-  exports.findByName  = Library.findByName;
-  exports.findById    = Library.findById;
+  exports.Library = Library;
 });
