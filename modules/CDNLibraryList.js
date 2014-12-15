@@ -11,7 +11,8 @@ define(function (require, exports, module) {
    * various CDNs.
    */
   function LibraryList() {
-    var libraries = [];
+    var libraries    = [],
+        libraryNames = [];
     
     /**
      * Gets the matching library from the array if
@@ -24,8 +25,15 @@ define(function (require, exports, module) {
           return libraries[i];
         }
       }
-      libraries.push(new Library(cdnLibrary.name));
-      return libraries[libraries.length - 1];
+      if (
+        typeof cdnLibrary.mainfile === 'undefined' ||
+        cdnLibrary.mainfile.length === 0
+      ) {
+        return null;
+      } else {
+        libraries.push(new Library(cdnLibrary.name));
+        return libraries[libraries.length - 1];
+      }
     }
     
     /**
@@ -40,21 +48,63 @@ define(function (require, exports, module) {
     function addCDN(name, cdnLibraries) {
       cdnLibraries.forEach(function (lib) {
         var library = getLibrary(lib);
-        library.addCDNInfo(name, lib);
+        if (library) {
+          library.addCDNInfo(name, lib);
+        }
       });
       libraries.sort(Library.compareIds);
+      updateLibraryNames();
     }
-
+    
+    function updateLibraryNames() {
+      libraryNames = libraries.map(function (library) {
+        return library.getName();
+      });
+    }
+    
     /**
-     * Returns the internal array of Library objects.
+     * Returns the library with the id given,
+     * or null if none was found.
+     *
+     * @param {String} id
+     * The id of the library
      */
-    function getLibraries() {
-      return libraries;
+    function findById(id) {
+      for (var i = 0; i < libraries.length; i++) {
+        var library = libraries[i];
+        if (library.getId() === id) {
+          return library;
+        }
+      }
+      return null;
+    }
+    
+    /**
+     * Returns the library with the name given,
+     * or null if none was found.
+     *
+     * @param {String} name
+     * The id of the library
+     */
+    function findByName(name) {
+      for (var i = 0; i < libraries.length; i++) {
+        var library = libraries[i];
+        if (library.getName() === name) {
+          return library;
+        }
+      }
+      return null;
+    }
+    
+    function getLibraryNames() {
+      return libraryNames;
     }
     
     return {
-      addCDN:       addCDN,
-      getLibraries: getLibraries
+      addCDN:          addCDN,
+      findById:        findById,
+      findByName:      findByName,
+      getLibraryNames: getLibraryNames
     };
   }
   
