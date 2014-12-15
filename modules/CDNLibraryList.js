@@ -30,12 +30,19 @@ define(function (require, exports, module) {
     
     /**
      * Adds the libraries hosted by a CDN to the list.
+     *
+     * @param name {String}
+     * The name of the CDN to add.
+     *
+     * @param cdnLibraries {Array}
+     * An array of libraries from the jsDeliver API.
      */
     function addCDN(name, cdnLibraries) {
       cdnLibraries.forEach(function (lib) {
         var library = getLibrary(lib);
         library.addCDNInfo(name, lib);
       });
+      libraries.sort(Library.compareIds);
     }
 
     /**

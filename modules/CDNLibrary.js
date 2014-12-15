@@ -47,15 +47,25 @@ define(function (require, exports, module) {
     /**
      * Determines if two libraries share the same name.
      */
-    function matches(library) {
-      return name === library.name;
+    function matches(libraryName) {
+      return id === normalizeName(libraryName);
     }
-    
+
     return {
       matches: matches,
-      addCDNInfo: addCDNInfo
+      addCDNInfo: addCDNInfo,
+      getName: function () {
+        return name;
+      },
+      getId: function () {
+        return id;
+      }
     };
   }
+  
+  Library.compareIds = function(a, b) {
+    return a.getId().localeCompare(b.getId());
+  };
   
   exports.Library = Library;
 });
