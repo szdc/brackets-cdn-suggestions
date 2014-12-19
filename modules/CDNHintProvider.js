@@ -143,7 +143,7 @@ define(function (require, exports, module) {
     }
     
     return {
-      hints: libraryNames.splice(0, 25),
+      hints: libraryNames,
       match: tagInfo.attr.name,
       selectInitial: true,
       handleWideResults: false
