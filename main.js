@@ -45,7 +45,7 @@ define(function (require, exports, module) {
   function registerHintProvider(libraryList) {
     console.log('Total libraries: ' + libraryList.getLibraryNames().length);
     var cdnHintProvider = new CDNHintProvider(libraryList);
-    CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 1);
+    CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 10);
   }
   
   downloadLibraries(CDNs, registerHintProvider);
