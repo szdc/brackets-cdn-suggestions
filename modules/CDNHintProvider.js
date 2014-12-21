@@ -226,7 +226,11 @@ define(function (require, exports, module) {
         library  = this.libraryList.findById(tagInfo.attr.name),
         snippet  = library.getSnippet(hint);
     
-    startPos.ch = 0;
+    // Find the location of the opening tag.
+    var line = this.editor.document.getLine(startPos.line),
+        tagStart = line.indexOf('<' + tagInfo.tagName);
+    
+    startPos.ch = tagStart;
     
     // Add an end position to overwrite the
     // entire line
@@ -235,7 +239,7 @@ define(function (require, exports, module) {
       ch: startPos.ch + snippet.length
     };
     
-    document.replaceRange(snippet, startPos, endPos);
+    document.replaceRange(snippet, startPos);
   };
 
   exports.CDNHintProvider = CDNHintProvider;
