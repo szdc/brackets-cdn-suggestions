@@ -232,14 +232,15 @@ define(function (require, exports, module) {
     
     startPos.ch = tagStart;
     
-    // Add an end position to overwrite the
-    // entire line
-    var endPos = {
-      line: startPos.line,
-      ch: startPos.ch + snippet.length
-    };
+    // Determine the length of the tag so far (i.e. the text to override).
+    var libraryIdStart = line.indexOf(tagInfo.attr.name, tagStart),
+        libraryIdEnd   = libraryIdStart + tagInfo.attr.name.length,
+        endPos = {
+          line: startPos.line,
+          ch: libraryIdEnd
+        };
     
-    document.replaceRange(snippet, startPos);
+    document.replaceRange(snippet, startPos, endPos);
   };
 
   exports.CDNHintProvider = CDNHintProvider;
