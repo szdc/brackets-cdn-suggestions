@@ -45,7 +45,7 @@ define(function (require, exports, module) {
     function addCDNInfo(cdnName, cdnLibrary) {
       if (cdns.length === 0) {
         libraryType = parseLibraryType(cdnLibrary.mainfile || cdnLibrary.name);
-        tag = libraryType === 'css' ? TAGS.CSS : TAGS.SCRIPT;
+        tag = libraryType === 'script' ? TAGS.SCRIPT : TAGS.CSS;
       }
       
       cdns.push(new CDNInfo(
