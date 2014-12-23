@@ -43,7 +43,6 @@ define(function (require, exports, module) {
    * Registers a hint provider for the extension.
    */
   function registerHintProvider(libraryList) {
-    console.log('Total libraries: ' + libraryList.getLibraryNames().length);
     var cdnHintProvider = new CDNHintProvider(libraryList);
     CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 10);
   }

@@ -14,11 +14,12 @@ define(function (require, exports, module) {
    * Represents a JS/CSS library.
    */
   function Library(libraryName) {
-    var id         = normalizeName(libraryName),
-        name       = libraryName,
-        tag        = '',
-        cdns       = [],
-        versions   = [];
+    var id          = normalizeName(libraryName),
+        name        = libraryName,
+        tag         = '',
+        libraryType = '',
+        cdns        = [],
+        versions    = [];
 
     /**
      * Returns a name with only its alphanumeric characters
@@ -43,7 +44,8 @@ define(function (require, exports, module) {
      */
     function addCDNInfo(cdnName, cdnLibrary) {
       if (cdns.length === 0) {
-        tag = getTag(cdnLibrary.mainfile || cdnLibrary.name);
+        libraryType = parseLibraryType(cdnLibrary.mainfile || cdnLibrary.name);
+        tag = libraryType === 'css' ? TAGS.CSS : TAGS.SCRIPT;
       }
       
       cdns.push(new CDNInfo(
@@ -118,16 +120,15 @@ define(function (require, exports, module) {
       }
       return null;
     }
-
+    
     /**
-     * Returns the HTML tag snippet associated with the
-     * library type (JS/CSS).
+     * Determines the type of the library.
      */
-    function getTag(fileName) {
+    function parseLibraryType(fileName) {
       if (fileName.indexOf('.css') === (fileName.length - 4)) {
-        return TAGS.CSS;
+        return 'link';
       } else {
-        return TAGS.SCRIPT;
+        return 'script';
       }
     }
 
@@ -151,6 +152,14 @@ define(function (require, exports, module) {
     function getVersions() {
       return versions;
     }
+    
+    /**
+     * Return the type associated with the library's main file.
+     * e.g. script, css
+     */
+    function getLibraryType() {
+      return libraryType;
+    }
 
     /**
      * Represents information about a CDN specific to
@@ -167,6 +176,7 @@ define(function (require, exports, module) {
       addCDNInfo: addCDNInfo,
       getId: getId,
       getName: getName,
+      getLibraryType: getLibraryType,
       getSnippet: getSnippet,
       getVersions: getVersions,
       matches: matches,

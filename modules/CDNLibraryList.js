@@ -56,9 +56,19 @@ define(function (require, exports, module) {
       updateLibraryNames();
     }
     
+    /**
+     * Updates the array of library names.
+     */
     function updateLibraryNames() {
-      libraryNames = libraries.map(function (library) {
-        return library.getName();
+      libraryNames = {};
+      libraries.forEach(function (library) {
+        var type = library.getLibraryType();
+        
+        if (!libraryNames.hasOwnProperty(type)) {
+          libraryNames[type] = [];
+        }
+        
+        libraryNames[type].push(library.getName());
       });
     }
     
@@ -96,15 +106,18 @@ define(function (require, exports, module) {
       return null;
     }
     
-    function getLibraryNames() {
-      return libraryNames;
+    /**
+     * Returns an array of libraries of the specified type.
+     */
+    function getLibraryNamesByType(type) {
+      return libraryNames[type];
     }
     
     return {
-      addCDN:          addCDN,
-      findById:        findById,
-      findByName:      findByName,
-      getLibraryNames: getLibraryNames
+      addCDN:                addCDN,
+      findById:              findById,
+      findByName:            findByName,
+      getLibraryNamesByType: getLibraryNamesByType
     };
   }
   

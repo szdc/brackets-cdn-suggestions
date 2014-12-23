@@ -109,7 +109,7 @@ define(function (require, exports, module) {
   CDNHintProvider.prototype.getLibraryHints = function (tagInfo) {
     var filter = new RegExp(tagInfo.attr.name, 'i');
     
-    var libraryNames = this.libraryList.getLibraryNames()
+    var libraryNames = this.libraryList.getLibraryNamesByType(tagInfo.tagName)
     .filter(function (libraryName) {
       return filter.test(libraryName);
     });
