@@ -6,13 +6,23 @@ define(function (require, exports, module) {
   
   // Brackets modules
   var CodeHintManager = brackets.getModule('editor/CodeHintManager'),
-      ExtensionUtils  = brackets.getModule('utils/ExtensionUtils');
+      ExtensionUtils  = brackets.getModule('utils/ExtensionUtils'),
+      CommandManager  = brackets.getModule('command/CommandManager'),
+      Menus           = brackets.getModule('command/Menus'),
+      PreferencesManager = brackets.getModule('preferences/PreferencesManager');
   
   // Extension modules
   var CDNHintProvider = require('modules/CDNHintProvider').CDNHintProvider,
       LibraryList     = require('modules/CDNLibraryList').LibraryList,
       API             = require('modules/jsdelivrAPI'),
-      CDNs            = JSON.parse(require('text!modules/CDNs.json'));
+      CDNs            = JSON.parse(require('text!modules/CDNs.json')),
+      CDNStrings      = require('modules/strings'),
+      CDNCommands     = require('modules/commands'),
+      CDNPrefs        = require('modules/prefs');
+  
+  // Preferences
+  var prefs = PreferencesManager.getExtensionPrefs('cdn-suggestions'),
+      stateManager = PreferencesManager.stateManager.getPrefixedSystem('cdn-suggestions');
   
   /**
    * Downloads libraries from the specified array
@@ -47,5 +57,61 @@ define(function (require, exports, module) {
     CodeHintManager.registerHintProvider(cdnHintProvider, ['html'], 10);
   }
   
+  /**
+   * Registers commands for the extension.
+   */
+  function registerCommands() {
+    CommandManager.register(
+      CDNStrings.CMD_USE_HTTPS, 
+      CDNCommands.USE_HTTPS,
+      function () {
+        var id       = CDNPrefs.USE_HTTPS.id,
+            useHTTPS = !prefs.get(id);
+        prefs.set(id, useHTTPS);
+        prefs.save();
+      }
+    )
+  }
+  
+  /**
+   * Registers a preference for the extension
+   *
+   * @param {Object} pref
+   * An object with the keys: id, type, initial
+   */
+  function registerPreference(pref) {
+    var prefObj = prefs.definePreference(pref.id, pref.type, pref.initial);
+    prefs.save();
+    return prefObj;
+  }
+  
+  /**
+   * Adds menu items.
+   */
+  function setupMenus() {
+    var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+    menu.addMenuDivider();
+    menu.addMenuItem(CDNCommands.USE_HTTPS);
+  }
+  
+  /**
+   * Toggles the checked state of a menu item.
+   *
+   * @param {String} command
+   * The command linked to the menu item.
+   *
+   * @param {String} prefId
+   * The id of the preference to lookup.
+   */
+  function toggleMenuItem(command, prefId) {
+    var value = prefs.get(prefId);
+    CommandManager.get(command).setChecked(value);
+  }
+  
+  registerCommands();
+  registerPreference(CDNPrefs.USE_HTTPS).on('change', function () {
+    toggleMenuItem(CDNCommands.USE_HTTPS, CDNPrefs.USE_HTTPS.id)
+  });
+  setupMenus();
   downloadLibraries(CDNs, registerHintProvider);
 });
