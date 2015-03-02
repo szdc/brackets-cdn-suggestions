@@ -88,9 +88,16 @@ define(function (require, exports, module) {
      * Returns the HTML snippet associated with the
      * specified version number.
      */
-    function getSnippet(version) {
-      var url = getURL(version);
-      return tag.replace('{url}', url);
+    function getSnippet(version, https) {
+      https = https || false;
+      var url     = getURL(version),
+          snippet = tag.replace('{url}', url);
+      
+      if (https) {
+        snippet = snippet.replace(/(href|src)="/, '$&https:');
+      }
+      
+      return snippet;
     }
 
     /**

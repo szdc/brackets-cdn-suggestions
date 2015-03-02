@@ -4,7 +4,10 @@
 define(function (require, exports, module) {
   'use strict';
   
-  var HTMLUtils  = brackets.getModule('language/HTMLUtils'),
+  var PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
+      HTMLUtils  = brackets.getModule('language/HTMLUtils'),
+      prefs      = PreferencesManager.getExtensionPrefs('cdn-suggestions'),
+      CDNPrefs   = require('modules/prefs'),
       CDNLibrary = require('modules/CDNLibrary');
   
   /**
@@ -224,7 +227,8 @@ define(function (require, exports, module) {
         startPos = this.editor.getCursorPos(),
         tagInfo  = HTMLUtils.getTagInfo(this.editor, this.editor.getCursorPos()),
         library  = this.libraryList.findById(tagInfo.attr.name),
-        snippet  = library.getSnippet(hint);
+        useHTTPS = prefs.get(CDNPrefs.USE_HTTPS.id),
+        snippet  = library.getSnippet(hint, useHTTPS);
     
     // Find the location of the opening tag.
     var line = this.editor.document.getLine(startPos.line),
