@@ -4,7 +4,7 @@
 define(function (require, exports, module) {
   'use strict';
   
-  var URL = 'http://api.jsdelivr.com/v1/{cdn}/libraries?fields=name,mainfile,versions';
+  var URL = 'https://api.jsdelivr.com/v1/{cdn}/libraries?fields=name,mainfile,versions';
   
   /**
    * Downloads the libraries hosted by the specified CDN.
